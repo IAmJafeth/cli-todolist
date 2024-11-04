@@ -1,25 +1,38 @@
 from typing import Dict, Union
-from pprint import pprint
+from rich.table import Table
+from rich.console import Console
 
-class Task():
+console = Console()
+
+class Task:
     tasks: Dict[int, "Task"] = {}
     __current_id: int = 0
 
-    def __init__(self, title: str, description:str = None) -> None:
+    def __init__(self, title: str, description:Union[str, None] = None) -> None:
         self.id = Task.__current_id
         self.title = title
         self.description = description
         self.completed = False
-    
-    def __str__(self) -> str:
-        return f"""\tId: {self.id}
-        Title: {self.title}
-        Description: {self.description if self.description else "N/A"}
-        Completed: {self.completed}
-        """
+
     def __repr__(self) -> str:
         return f"<task.Task(id={self.id}, title={self.title}, description={self.description}, completed={self.completed})>"
-    
+
+    def render_completed(self, complete_symbol: str = '✅', incomplete_symbol: str = '❌') -> str:
+        return complete_symbol if self.completed else incomplete_symbol
+
+    def show_details(self,description: str = "Details") -> None:
+        table = Table(title=f"\nTask {self.id} {description}\n", show_edge=False)
+
+        table.add_column("Field", justify="right")
+        table.add_column("Value", justify="left")
+
+        table.add_row("Id", str(self.id))
+        table.add_row("Title", self.title)
+        if self.description: table.add_row("Description", self.description)
+        table.add_row("Complete", self.render_completed())
+
+        console.print(table)
+
     @classmethod
     def create(cls, title: str, description:str) -> "Task":
         task = Task(title,description)
@@ -43,8 +56,18 @@ class Task():
         return False
 
     @classmethod
-    def list(cls) -> None:
-        if cls.tasks:
-            pprint(cls.tasks)
-        else:
-            print("No Tasks have been created yet")
+    def list_all(cls) -> None:
+        if  not cls.tasks:
+            print("\nNo Tasks have been created yet")
+            return
+        table = Table(title="\nCurrent Tasks\n", show_edge=False)
+        table.add_column("Id")
+        table.add_column("Title")
+        table.add_column("Description")
+        table.add_column("Completed")
+
+        for task in cls.tasks.values():
+            table.add_row(str(task.id), task.title, task.description, task.render_completed())
+
+        console.print(table)
+
