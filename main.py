@@ -35,14 +35,14 @@ match command:
         task: Task | bool = Task.delete(args.id)
 
         if task:
-            print(f"Task {args.id} Deleted Succesfully\n\n", task)
+            print(f"Task {args.id} Deleted Successfully\n\n", task)
         else:
             parser.exit(message=f"Error: Task with id: \"{args.id}\" does not exist", status=2)
 
     case "complete":
         task: Task | bool = Task.complete(args.id)
         if task:
-            print(f"Task {args.id} marked as compelted\n\n",task)
+            print(f"Task {args.id} marked as completed\n\n",task)
         else:
             parser.exit(message=f"Task with id: \"{args.id}\" does not exist", status=2)
 
