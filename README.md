@@ -22,4 +22,6 @@ I just created it to practice my Python skills, it is not intended to be used in
 - [ ] Add support for tags
 - [ ] Add support for subtasks
 - [ ] Add support for recurring tasks
+- [ ] Create `Setup.py` to install the package
 - [ ] Add support for TUI using [**Textual**](https://github.com/Textualize/textual)
+- [ ] Add support for GUI using [**DearPyGui**](
