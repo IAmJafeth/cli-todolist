@@ -1,13 +1,17 @@
 import argparse
-from task import Task, console
+from task import console, create_task, delete_task, complete_task, list_tasks
+from models import Base
+from database import engine
 
 def main():
+    Base.metadata.create_all(bind=engine)
+
     parser = argparse.ArgumentParser(
         prog="Todo", description="A simple Todo list in the CLI"
     )
 
     # Main command subparser
-    command_subparser = parser.add_subparsers(title="Commands", dest="command", description="Available Commands", required=True, metavar="")
+    command_subparser = parser.add_subparsers(title="General Commands", dest="command", description="Available Commands", required=True)
 
     # Create Task Command
     create_parser = command_subparser.add_parser("create", help="Create a new Task")
@@ -28,40 +32,15 @@ def main():
     # Store arguments in a Variable
     args = parser.parse_args()
 
-    # * Test Tasks
-    # TODO: Delete this once we have persistent data
-    Task.create("Buy Groceries", "Buy Milk, Bread, and Eggs")
-    Task.create("Workout", "Go for a 30-minute run")
-    Task.create("Read", "Read the book 'Atomic Habits'")
-    Task.complete(1)
-
     match args.command:
         case "create":
-            task = Task.create(args.title, args.description)
-            print("New Task Created\n",)
-            task.show_details()
-
+            create_task(args.title, args.description)
         case "delete":
-            task: Task | bool = Task.delete(args.id)
-
-            if task:
-                task.show_details("Deleted Successfully 🗑️")
-            else:
-                console.print(f"[bold red]Delete Error: Task with id {args.id} does not exist[/bold red]")
-                Task.list_all()
-                parser.exit(status=2)
-
+            delete_task(args.id)
         case "complete":
-            task: Task | bool = Task.complete(args.id)
-            if task:
-                task.show_details("Marked as Completed ✔")
-            else:
-                console.print(f"[bold red]Complete Error: Task with id {args.id} does not exist[/bold red]")
-                Task.list_all()
-                parser.exit(status=2)
-
+            complete_task(args.id)
         case "list":
-            Task.list_all()
+            list_tasks()
 
 
 if __name__ == "__main__":
