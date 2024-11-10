@@ -11,7 +11,7 @@ I just created it to practice my Python skills, it is not intended to be used in
 - [x] List tasks
 - [x] Mark tasks as done
 - [X] Prittify the output using **Rich**
-- [ ] Add support for persistence (SQLite)
+- [X] Add support for persistence (SQLite)
 - [ ] Add support for editing tasks
 - [ ] Add support for sorting tasks
 - [ ] Add logging
