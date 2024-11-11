@@ -21,7 +21,7 @@ def main():
     # Delete Task Command
     delete_parser = command_subparser.add_parser("delete", help="Delete a task")
     delete_parser.add_argument("id", type=int, help="ID of the Task to be deleted")
-
+    delete_parser.add_argument("-i", "--interactive", action='store_true', help="Ask for confirmation before deleting the task", default=False)
     # Mark a Task as Completed Command
     complete_parser = command_subparser.add_parser("complete", help="Mark the Task as Completed")
     complete_parser.add_argument("id", type=int, help="Id of the Task to mark as completed")
@@ -31,12 +31,13 @@ def main():
 
     # Store arguments in a Variable
     args = parser.parse_args()
-
+    print()
+    
     match args.command:
         case "create":
             create_task(args.title, args.description)
         case "delete":
-            delete_task(args.id)
+            delete_task(args.id, args.interactive)
         case "complete":
             complete_task(args.id)
         case "list":

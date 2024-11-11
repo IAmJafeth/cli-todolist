@@ -1,7 +1,11 @@
 from rich.table import Table
 from rich.console import Console
+from rich.prompt import Prompt, Confirm
+from rich.panel import Panel
 from database import Session
 from models import Task
+
+OPTIONS = ['Title', 'Description']
 
 console = Console()
 
@@ -9,7 +13,7 @@ def render_completed(completed: bool, complete_symbol: str = '✅', incomplete_s
     return complete_symbol if completed else incomplete_symbol
 
 def print_task(task: Task, message: str = "Details"):
-    table = Table(title=f"\nTask {task.id} {message}\n", show_edge=False, show_header=False)
+    table = Table(title=f"Task {task.id} {message}\n", show_edge=False, show_header=False, title_style="b")
     table.add_column(justify="right")
     table.add_column( justify="left")
 
@@ -28,10 +32,15 @@ def create_task(title: str, description: str) -> None:
         session.refresh(task)
         print_task(task, "Created Successfully ☀️")
 
-def delete_task(id: int) -> None:
+def delete_task(id: int, interactive: bool = False) -> None:
     with Session() as session:
         task = session.query(Task).filter(Task.id == id).first()
         if task:
+            if interactive:
+                if not Confirm.ask(f"Do you want to delete: [yellow]{task.id}-[/yellow] [bold]{task.title}[/bold]?"):
+                    console.print("[bold red] Deletion Cancelled [/bold red]")
+                    return
+                
             session.delete(task)
             print_task(task, "Deleted Succesfully 🚮")
             session.commit()
@@ -71,7 +80,7 @@ def list_tasks() -> None:
         console.print("\n\t[magenta] No Tasks have been created yet[/magenta]\n")
         return
 
-    table = Table(title="\nAll Tasks 📃\n", show_edge=False)
+    table = Table(title="All Tasks 📃\n", show_edge=False, leading = True, title_style="bold")
     table.add_column("Id")
     table.add_column("Title")
     table.add_column("Description")
