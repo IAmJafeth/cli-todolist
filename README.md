@@ -12,7 +12,7 @@ I just created it to practice my Python skills, it is not intended to be used in
 - [x] Mark tasks as done
 - [X] Prittify the output using **Rich**
 - [X] Add support for persistence (SQLite)
-- [ ] Add support for editing tasks
+- [x] Add support for editing tasks
 - [ ] Add support for sorting tasks
 - [ ] Add logging
 - [ ] Add tests
