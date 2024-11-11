@@ -1,5 +1,5 @@
 import argparse
-from task import console, create_task, delete_task, complete_task, list_tasks
+from task import console, create_task, delete_task, complete_task, list_tasks, interactive_edit
 from models import Base
 from database import engine, get_session
 
@@ -20,7 +20,7 @@ def main():
 
     # Delete Task Command
     delete_parser = command_subparser.add_parser("delete", help="Delete a task")
-    delete_parser.add_argument("id", type=int, help="ID of the Task to be deleted")
+    delete_parser.add_argument("id", type=int, help="Id of the Task to delete")
     delete_parser.add_argument("-i", "--interactive", action='store_true', help="Ask for confirmation before deleting the task", default=False)
     # Mark a Task as Completed Command
     complete_parser = command_subparser.add_parser("complete", help="Mark the Task as Completed")
@@ -28,6 +28,10 @@ def main():
 
     # List all Tasks command
     list_parser = command_subparser.add_parser("list", help="List all current Tasks")
+
+    # Edit Task command
+    edit_parser = command_subparser.add_parser('edit', help="Edit the selected Task")
+    edit_parser.add_argument('id', type=int, help="Id of the Task to edit")
 
     # Store arguments in a Variable
     args = parser.parse_args()
@@ -47,7 +51,11 @@ def main():
                     parser.exit(2)
             case "list":
                 list_tasks(session)
-
+            case "edit":
+                if not interactive_edit(session, args.id):
+                    parser.exit(2)
+            case _: 
+                parser.error("Unrecognized command")
 
 if __name__ == "__main__":
     main()

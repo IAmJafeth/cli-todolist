@@ -5,15 +5,13 @@ from rich.panel import Panel
 from sqlalchemy.orm import Session
 from models import Task
 
-OPTIONS = ['Title', 'Description', 'Complete', 'Incomplete']
-
 console = Console()
 
 def get_task_by_id(session: Session, id: int) -> Task:
     task = session.query(Task).filter(Task.id == id).first()
 
     if not task: 
-        console.print(f"[bold red]Error:[/bold red] [red]Task with id [bold]{id}[/bold] not found ×[/red]")
+        console.print(f"[bold red]Error:[/bold red] [red]Task with id [yellow bold]{id}[/yellow bold] not found ×[/red]")
         return
     
     return task
@@ -68,7 +66,7 @@ def complete_task(session: Session, id: int) -> bool:
     if not task:
         return False
     
-    console.print(task, f"\n[green]Task [bold]{id}[/bold] marked as completed  successfully ✔[/green]")
+    console.print(task, f"\n[green]Task [yellow bold]{id}[/yellow bold] marked as completed successfully ✔[/green]")
     return True
 
 def list_tasks(session: Session) -> None:
@@ -87,3 +85,31 @@ def list_tasks(session: Session) -> None:
     for task in tasks:
         table.add_row(str(task.id), task.title, task.description, task.render_completed())
     console.print(table)
+
+
+def interactive_edit(session: Session, id: int) -> bool:
+    CHOICES_TO_EDIT = ['Title', 'Description', 'Complete', 'Incomplete']
+    task = get_task_by_id(session, id)
+
+    if not task: 
+        return False
+    
+    console.print(task)
+    field_to_edit = Prompt.ask("Select the value to edit", choices=CHOICES_TO_EDIT, case_sensitive=False)
+    
+    match field_to_edit:
+        case 'Title':
+            task = update_task(session, id, title=Prompt.ask(f"Enter the new {field_to_edit}"))
+        case 'Description':
+            task = update_task(session, id, description=Prompt.ask(f"\nEnter the new {field_to_edit}"))
+        case 'Complete':
+            task = update_task(session, id, completed=True)
+        case 'Incomplete':
+            task = update_task(session, id, completed=False)
+        case _:
+            console.print(f"[bold red]Error:[/bold red] [red]Command not recognized ×[/red]")
+            return False
+    
+    console.print('\n', task, f"\n[green]Task [yellow bold]{id}[/yellow bold] editted successfully ✔[/green]\n")
+    console.print(task)
+    return True
