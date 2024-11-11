@@ -1,5 +1,5 @@
 import argparse
-from task import console, create_task, delete_task, complete_task, list_tasks, interactive_edit
+from task import console, create_task, delete_task, complete_task, list_tasks, interactive_edit_task, edit_task
 from models import Base
 from database import engine, get_session
 
@@ -30,8 +30,17 @@ def main():
     list_parser = command_subparser.add_parser("list", help="List all current Tasks")
 
     # Edit Task command
-    edit_parser = command_subparser.add_parser('edit', help="Edit the selected Task")
+    edit_parser = command_subparser.add_parser('edit', help="Edit the selected Task (Interactive edit by default if not argument is provided)")
     edit_parser.add_argument('id', type=int, help="Id of the Task to edit")
+
+    #Opionals Arguments to Edit the Task directlu
+    edit_parser.add_argument("-t", "--title", help="New title value")
+    edit_parser.add_argument("-d", "--description", help="New description value")
+
+    # Task completion arguments, MUTUAL EXCLUSIVE
+    task_completion = edit_parser.add_mutually_exclusive_group()
+    task_completion.add_argument("-c", "--completed", help = "Mark the Task as completed", action="store_true")
+    task_completion.add_argument("-i", "--incomplete", help="Mark the Task as incomplete", action="store_true")
 
     # Store arguments in a Variable
     args = parser.parse_args()
@@ -52,8 +61,12 @@ def main():
             case "list":
                 list_tasks(session)
             case "edit":
-                if not interactive_edit(session, args.id):
-                    parser.exit(2)
+                if not any([args.title, args.description, args.completed, args.incomplete]):
+                    if not interactive_edit_task(session, args.id):
+                        parser.exit(2)
+                else:
+                    if not edit_task(session, args.id, args.title, args.description, args.completed, args.incomplete):
+                        parser.exit(2)
             case _: 
                 parser.error("Unrecognized command")
 
