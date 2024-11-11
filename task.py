@@ -22,33 +22,37 @@ def get_all_tasks(session: Session) -> list[Task]:
     return session.query(Task).all()
 
 
-def create_task(session: Session, title: str, description: str) -> None:
+def create_task(session: Session, title: str, description: str) -> bool:
     task = Task(title=title, description=description)
     session.add(task)
     session.commit()
     session.refresh(task)
     console.print(task)
+    console.print(f"\n[green]Task [bold]{task.id}[/bold] created successfully[/green]")
+    return True
 
-def delete_task(session: Session, id: int, interactive: bool = False) -> None:
+def delete_task(session: Session, id: int, interactive: bool = False) -> bool:
     task = get_task_by_id(session, id)
     if not task:
-        return
+        return False
     
     if interactive:
         if not Confirm.ask(f"Do you want to delete: [yellow]{task.id}-[/yellow] [bold]{task.title}[/bold]?"):
             console.print("[bold red] Deletion Cancelled [/bold red]")
-            return
+            return False
         
     session.delete(task)
     console.print(task)
     session.commit()
+    console.print(f"\n[green]Task [bold]{task.id}[/bold] deleted successfully[/green]")
+    return True
     
 
-def update_task(session: Session, id: int, message: str, title: str = None, description: str = None, completed: bool = None, ) -> None:
+def update_task(session: Session, id: int, title: str = None, description: str = None, completed: bool = None, ) -> bool:
     task = get_task_by_id(session, id)
 
     if not task:
-        return
+        return False
 
     if title is not None:
         task.title = title
@@ -60,9 +64,14 @@ def update_task(session: Session, id: int, message: str, title: str = None, desc
     session.commit() 
     session.refresh(task)
     console.print(task)
+    return True
 
-def complete_task(session: Session, id: int) -> None:
-    update_task(session, id, "Marked As Completed ✔️", completed=True)
+def complete_task(session: Session, id: int) -> bool:
+    task = update_task(session, id,  completed=True)
+    if not task:
+        return False
+    console.print(f"\n[green]Task [bold]{id}[/bold] arked as completed  successfully ✔[/green]")
+    return True
 
 def list_tasks(session: Session) -> None:
     tasks = get_all_tasks(session)

@@ -37,11 +37,14 @@ def main():
 
         match args.command:
             case "create":
-                create_task(session, args.title, args.description)
+                if not create_task(session, args.title, args.description):
+                    parser.exit(2)
             case "delete":
-                delete_task(session, args.id, args.interactive)
+                if not delete_task(session, args.id, args.interactive):
+                    parser.exit(2)            
             case "complete":
-                complete_task(session, args.id)
+                if not complete_task(session, args.id):
+                    parser.exit(2)
             case "list":
                 list_tasks(session)
 
