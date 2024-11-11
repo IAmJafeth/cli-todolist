@@ -11,6 +11,15 @@ INCOMPLETE_SYMBOL = '❌'
 
 console = Console()
 
+def get_task_by_id(session: Session, id: int) -> Task:
+    task = session.query(Task).filter(Task.id == id).first()
+
+    if not task: 
+        console.print(f"[bold red]Delete Error:[/bold red] [red]Task with id [bold]{id}[/bold] not found[/red]")
+        return
+    
+    return task
+
 def get_all_tasks(session: Session) -> list[Task]:
     return session.query(Task).all()
 
@@ -37,23 +46,24 @@ def create_task(session: Session, title: str, description: str) -> None:
     print_task(task, "Created Successfully ☀️")
 
 def delete_task(session: Session, id: int, interactive: bool = False) -> None:
-    task = session.query(Task).filter(Task.id == id).first()
-    if task:
-        if interactive:
-            if not Confirm.ask(f"Do you want to delete: [yellow]{task.id}-[/yellow] [bold]{task.title}[/bold]?"):
-                console.print("[bold red] Deletion Cancelled [/bold red]")
-                return
-            
-        session.delete(task)
-        print_task(task, "Deleted Succesfully 🚮")
-        session.commit()
-    else:
-        console.print(f"[bold red]Delete Error:[/bold red] [red]Task with id [bold]{id}[/bold] not found[/red]")
+    task = get_task_by_id(session, id)
+    if not task:
+        return
+    
+    if interactive:
+        if not Confirm.ask(f"Do you want to delete: [yellow]{task.id}-[/yellow] [bold]{task.title}[/bold]?"):
+            console.print("[bold red] Deletion Cancelled [/bold red]")
+            return
+        
+    session.delete(task)
+    print_task(task, "Deleted Succesfully 🚮")
+    session.commit()
+    
 
 def update_task(session: Session, id: int, message: str, title: str = None, description: str = None, completed: bool = None, ) -> None:
-    task = session.query(Task).filter(Task.id == id).first()
+    task = get_task_by_id(session, id)
+
     if not task:
-        console.print(f"[bold red]Delete Error:[/bold red] [red]Task with id [bold]{id}[/bold] not found[/red]")
         return
 
     if title is not None:
