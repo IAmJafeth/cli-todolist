@@ -1,7 +1,7 @@
 import argparse
 from task import console, create_task, delete_task, complete_task, list_tasks
 from models import Base
-from database import engine
+from database import engine, get_session
 
 def main():
     Base.metadata.create_all(bind=engine)
@@ -33,15 +33,17 @@ def main():
     args = parser.parse_args()
     print()
     
-    match args.command:
-        case "create":
-            create_task(args.title, args.description)
-        case "delete":
-            delete_task(args.id, args.interactive)
-        case "complete":
-            complete_task(args.id)
-        case "list":
-            list_tasks()
+    with get_session() as session:
+
+        match args.command:
+            case "create":
+                create_task(session, args.title, args.description)
+            case "delete":
+                delete_task(session, args.id, args.interactive)
+            case "complete":
+                complete_task(session, args.id)
+            case "list":
+                list_tasks(session)
 
 
 if __name__ == "__main__":
