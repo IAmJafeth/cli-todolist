@@ -13,7 +13,7 @@ def get_task_by_id(session: Session, id: int) -> Task:
     task = session.query(Task).filter(Task.id == id).first()
 
     if not task: 
-        console.print(f"[bold red]Error:[/bold red] [red]Task with id [bold]{id}[/bold] not found[/red]")
+        console.print(f"[bold red]Error:[/bold red] [red]Task with id [bold]{id}[/bold] not found ×[/red]")
         return
     
     return task
@@ -27,8 +27,7 @@ def create_task(session: Session, title: str, description: str) -> bool:
     session.add(task)
     session.commit()
     session.refresh(task)
-    console.print(task)
-    console.print(f"\n[green]Task [bold]{task.id}[/bold] created successfully[/green]")
+    console.print(task, f"\n[green]Task [bold]{task.id}[/bold] created successfully ✔[/green]")
     return True
 
 def delete_task(session: Session, id: int, interactive: bool = False) -> bool:
@@ -42,17 +41,16 @@ def delete_task(session: Session, id: int, interactive: bool = False) -> bool:
             return False
         
     session.delete(task)
-    console.print(task)
     session.commit()
-    console.print(f"\n[green]Task [bold]{task.id}[/bold] deleted successfully[/green]")
+    console.print(task, f"\n[green]Task [bold]{task.id}[/bold] deleted successfully ✔[/green]")
     return True
     
 
-def update_task(session: Session, id: int, title: str = None, description: str = None, completed: bool = None, ) -> bool:
+def update_task(session: Session, id: int, title: str = None, description: str = None, completed: bool = None, ) -> Task:
     task = get_task_by_id(session, id)
 
     if not task:
-        return False
+        return
 
     if title is not None:
         task.title = title
@@ -63,14 +61,14 @@ def update_task(session: Session, id: int, title: str = None, description: str =
 
     session.commit() 
     session.refresh(task)
-    console.print(task)
-    return True
+    return task
 
 def complete_task(session: Session, id: int) -> bool:
     task = update_task(session, id,  completed=True)
     if not task:
         return False
-    console.print(f"\n[green]Task [bold]{id}[/bold] arked as completed  successfully ✔[/green]")
+    
+    console.print(task, f"\n[green]Task [bold]{id}[/bold] marked as completed  successfully ✔[/green]")
     return True
 
 def list_tasks(session: Session) -> None:
