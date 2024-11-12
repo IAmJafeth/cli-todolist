@@ -1,9 +1,10 @@
 import argparse
-from task import console, create_task, delete_task, complete_task, list_tasks, interactive_edit_task, edit_task
+from task import create_task, delete_task, complete_task, list_tasks, interactive_edit_task, edit_task
 from models import Base
 from database import engine, get_session
 
 def main():
+    """Entry point for cli-todolist."""    
     Base.metadata.create_all(bind=engine)
 
     parser = argparse.ArgumentParser(
@@ -22,6 +23,7 @@ def main():
     delete_parser = command_subparser.add_parser("delete", help="Delete a task")
     delete_parser.add_argument("id", type=int, help="Id of the Task to delete")
     delete_parser.add_argument("-i", "--interactive", action='store_true', help="Ask for confirmation before deleting the task", default=False)
+    
     # Mark a Task as Completed Command
     complete_parser = command_subparser.add_parser("complete", help="Mark the Task as Completed")
     complete_parser.add_argument("id", type=int, help="Id of the Task to mark as completed")
@@ -32,7 +34,7 @@ def main():
     list_parser.add_argument("-r", "--reversed", action="store_true", help="Reverse the Task Table")
 
     # Edit Task command
-    edit_parser = command_subparser.add_parser('edit', help="Edit the selected Task (Interactive edit by default if not argument is provided)")
+    edit_parser = command_subparser.add_parser('edit', help="Edit the selected Task (Interactive edit by default if no argument is provided)")
     edit_parser.add_argument('id', type=int, help="Id of the Task to edit")
 
     #Opionals Arguments to Edit the Task directlu
