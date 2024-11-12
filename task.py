@@ -16,8 +16,9 @@ def get_task_by_id(session: Session, id: int) -> Task:
     
     return task
 
-def get_all_tasks(session: Session) -> list[Task]:
-    return session.query(Task).all()
+def get_all_tasks(session: Session, order_by: str = 'id', reveresed_flag: bool = False) -> list[Task]:
+    tasks = session.query(Task).order_by(getattr(Task,order_by)).all()
+    return tasks if not reveresed_flag else reversed(tasks)
 
 
 def create_task(session: Session, title: str, description: str) -> bool:
@@ -69,8 +70,8 @@ def complete_task(session: Session, id: int) -> bool:
     console.print(task, f"\n[green]Task [yellow bold]{id}[/yellow bold] marked as completed successfully ✔[/green]")
     return True
 
-def list_tasks(session: Session) -> None:
-    tasks = get_all_tasks(session)
+def list_tasks(session: Session, order_by: str = "id", reveresed_flag: bool = False) -> None:
+    tasks = get_all_tasks(session, order_by, reveresed_flag)
 
     if not tasks:
         console.print("\n\t[magenta] No Tasks have been created yet[/magenta]\n")
@@ -88,7 +89,7 @@ def list_tasks(session: Session) -> None:
 
 
 def interactive_edit_task(session: Session, id: int) -> bool:
-    CHOICES_TO_EDIT = ['Title', 'Description', 'Complete', 'Incomplete']
+    CHOICES_TO_EDIT = ['title', 'description', 'complete', 'incomplete']
     task = get_task_by_id(session, id)
 
     if not task: 
@@ -100,19 +101,19 @@ def interactive_edit_task(session: Session, id: int) -> bool:
     
  
         match field_to_edit:
-            case 'Title':
+            case 'title':
                 task = update_task(session, id, title=Prompt.ask(f"Enter the new {field_to_edit}"))
-            case 'Description':
+            case 'description':
                 task = update_task(session, id, description=Prompt.ask(f"\nEnter the new {field_to_edit}"))
-            case 'Complete':
+            case 'complete':
                 task = update_task(session, id, completed=True)
-            case 'Incomplete':
+            case 'incomplete':
                 task = update_task(session, id, completed=False)
             case _:
                 console.print(f"[bold red]Error:[/bold red] [red]Command not recognized ×[/red]")
                 return False
         
-        console.print(task, f"\n[green]Task [yellow bold]{id}[/yellow bold] editted successfully ✔[/green]\n")
+        console.print('\n', task, f"\n[green]Task [yellow bold]{id}[/yellow bold] editted successfully ✔[/green]\n")
 
         if not Confirm.ask("Would you like to do another change?"):
             break

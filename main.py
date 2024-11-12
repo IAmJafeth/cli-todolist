@@ -28,6 +28,8 @@ def main():
 
     # List all Tasks command
     list_parser = command_subparser.add_parser("list", help="List all current Tasks")
+    list_parser.add_argument("-s", "--sort", choices=["id", "title", "completed"], default="id", help="Sort the Task Table. Default: id")
+    list_parser.add_argument("-r", "--reversed", action="store_true", help="Reverse the Task Table")
 
     # Edit Task command
     edit_parser = command_subparser.add_parser('edit', help="Edit the selected Task (Interactive edit by default if not argument is provided)")
@@ -59,7 +61,7 @@ def main():
                 if not complete_task(session, args.id):
                     parser.exit(2)
             case "list":
-                list_tasks(session)
+                list_tasks(session,args.sort, args.reversed)
             case "edit":
                 if not any([args.title, args.description, args.completed, args.incomplete]):
                     if not interactive_edit_task(session, args.id):
