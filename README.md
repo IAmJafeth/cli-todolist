@@ -13,7 +13,7 @@ I just created it to practice my Python skills, it is not intended to be used in
 - [X] Prittify the output using **Rich**
 - [X] Add support for persistence (SQLite)
 - [x] Add support for editing tasks
-- [ ] Add support for sorting tasks
+- [x] Add support for sorting tasks
 - [ ] Add logging
 - [ ] Add tests
 - [ ] Add support for multiple lists
