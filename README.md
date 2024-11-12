@@ -114,9 +114,6 @@ Here are some examples of how to use `cli-todolist`:
   - Ensure error messages are properly logged or optionally printed.
 
 ### 2. **Improve `get_all_tasks` Function**
-- [ ] **Fix Reverse Logic**  
-  - Correct the reversed logic (`reversed(tasks)` returns an iterator).
-
 - [ ] **Handle Empty Results**  
   - Ensure a meaningful message is returned or logged when no tasks are found.
 

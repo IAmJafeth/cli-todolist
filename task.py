@@ -18,7 +18,7 @@ def get_task_by_id(session: Session, id: int) -> Task:
 
 def get_all_tasks(session: Session, order_by: str = 'id', reveresed_flag: bool = False) -> list[Task]:
     tasks = session.query(Task).order_by(getattr(Task,order_by)).all()
-    return tasks if not reveresed_flag else reversed(tasks)
+    return tasks if not reveresed_flag else list(reversed(tasks))
 
 
 def create_task(session: Session, title: str, description: str) -> bool:
