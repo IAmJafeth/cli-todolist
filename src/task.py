@@ -137,9 +137,8 @@ def interactive_edit_task(session: Session, id: int) -> bool:
     console.print(task)
 
     while True: 
-        field_to_edit = Prompt.ask("\nSelect the value to edit", choices=CHOICES_TO_EDIT, case_sensitive=False)
-    
- 
+        field_to_edit = Prompt.ask("\nSelect the value to edit", choices=CHOICES_TO_EDIT)
+        
         match field_to_edit:
             case 'title':
                 task = update_task(session, id, title=Prompt.ask(f"Enter the new {field_to_edit}"))

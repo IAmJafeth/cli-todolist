@@ -42,7 +42,7 @@
 
 3. Run the app:
    ```bash
-   python todolist.py
+   python src/todolist.py
    ```
 
 ---

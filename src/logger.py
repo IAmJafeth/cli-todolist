@@ -17,7 +17,7 @@ def setup_logger(debug: bool = False) -> None:
 
     # Console handler
     debug_level = logging.CRITICAL if not debug else logging.DEBUG
-    console_handler = RichHandler(markup=True, rich_tracebacks=True)
+    console_handler = RichHandler(markup=True, rich_tracebacks=True, tracebacks_show_locals=True)
     console_handler.setLevel(debug_level)
     console_formatter = logging.Formatter("%(levelname)s: %(message)s")
     logger.addHandler(file_handler)
