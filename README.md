@@ -189,9 +189,9 @@ Here are some examples of how to use `cli-todolist`:
 - [x] Add support for persistence (SQLite)
 - [x] Add support for editing tasks
 - [x] Add support for sorting tasks
+- [x] Add logging
 
 ### In Progress
-- [ ] Add logging
 - [ ] Add tests
 
 ### Planned
