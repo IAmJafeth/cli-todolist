@@ -1,9 +1,13 @@
 import logging
 from rich.logging import RichHandler
+import os
 
 LOGGER_NAME = "todolist"
 CONSOLE_LOG_LEVEL = "CRITICAL"
 FILE_LOG_LEVEL = "DEBUG"
+
+if not os.path.exists("../data"):
+    os.makedirs("../data")
 
 def setup_logger(logger_name: str = LOGGER_NAME, console_level: str = CONSOLE_LOG_LEVEL, file_level: str = FILE_LOG_LEVEL) -> None:
     logger = logging.getLogger(logger_name)
