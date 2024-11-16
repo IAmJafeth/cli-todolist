@@ -1,16 +1,16 @@
 import logging
 from rich.logging import RichHandler
 
-LOGER_NAME = "todolist"
+LOGGER_NAME = "todolist"
 CONSOLE_LOG_LEVEL = "CRITICAL"
 FILE_LOG_LEVEL = "DEBUG"
 
-def setup_logger(console_level: str = CONSOLE_LOG_LEVEL, file_level: str = FILE_LOG_LEVEL) -> None:
-    logger = logging.getLogger(LOGER_NAME)
+def setup_logger(logger_name: str = LOGGER_NAME, console_level: str = CONSOLE_LOG_LEVEL, file_level: str = FILE_LOG_LEVEL) -> None:
+    logger = logging.getLogger(logger_name)
     logger.setLevel(logging.DEBUG)
 
     # File handler
-    file_handler = logging.FileHandler(f"../{f"{LOGER_NAME}.log"}")
+    file_handler = logging.FileHandler(f"../data/{f"{logger_name}.log"}")
     file_handler.setLevel(file_level)
     file_formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
     file_handler.setFormatter(file_formatter)
@@ -22,5 +22,5 @@ def setup_logger(console_level: str = CONSOLE_LOG_LEVEL, file_level: str = FILE_
     logger.addHandler(file_handler)
     logger.addHandler(console_handler)
 
-def get_logger() -> logging.Logger:
-    return logging.getLogger(LOGER_NAME)
+def get_logger(logger_name: str = LOGGER_NAME) -> logging.Logger:
+    return logging.getLogger(logger_name)
