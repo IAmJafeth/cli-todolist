@@ -1,13 +1,12 @@
 from parser import setup_pareser
 from task import create_task, delete_task, complete_task, list_tasks, interactive_edit_task, edit_task
-from models import Base
-from database import engine, get_session
+from database import Database
 from logger import setup_logger, get_logger
 
 def main():
     """Entry point for cli-todolist."""    
     
-    Base.metadata.create_all(bind=engine)
+    Database.run_migrations()
 
     parser = setup_pareser()
 
@@ -22,7 +21,7 @@ def main():
     logger = get_logger()
     logger.debug(f"Parser Arguments: {args.__dict__}")
 
-    with get_session() as session:
+    with Database.get_session() as session:
         try:
             match args.command:
                 case "create":
