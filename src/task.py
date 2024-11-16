@@ -1,7 +1,6 @@
 from rich.table import Table
 from rich.console import Console
 from rich.prompt import Prompt, Confirm
-from rich.panel import Panel
 from sqlalchemy.orm import Session
 from models import Task
 from logger import get_logger
@@ -9,7 +8,7 @@ from logger import get_logger
 console = Console()
 logger = get_logger()
 
-def get_task_by_id(session: Session, id: int) -> Task:
+def get_task_by_id(session: Session, id: int) -> Task | None:
     logger.debug(f"Fetching Task with {id=}")
     task = session.query(Task).filter(Task.id == id).first()
 
@@ -51,14 +50,17 @@ def get_all_tasks(session: Session, order_by: str = 'id', reveresed_flag: bool =
 
 
 def create_task(session: Session, title: str, description: str) -> bool:
+    logger.debug(f"Creating Task with {title=}, {description=}")
     task = Task(title=title, description=description)
     session.add(task)
     session.commit()
     session.refresh(task)
+    logger.debug(f"Task created: {task}")
     console.print(task, f"\n[green]Task [bold]{task.id}[/bold] created successfully ✔[/green]")
     return True
 
 def delete_task(session: Session, id: int, interactive: bool = False) -> bool:
+    logger.debug(f"Deleting Task with {id=}")
     task = get_task_by_id(session, id)
     if not task:
         logger.warning(f"Attempted to delete non-existent task with {id=}.")
@@ -77,7 +79,7 @@ def delete_task(session: Session, id: int, interactive: bool = False) -> bool:
     return True
     
 
-def update_task(session: Session, id: int, title: str = None, description: str = None, completed: bool = None, ) -> Task:
+def update_task(session: Session, id: int, title: str = None, description: str = None, completed: bool = None, ) -> Task | None:
     task = get_task_by_id(session, id)
     if not task:
         logger.warning(f"Attempted to update non-existent task with {id=}.")
@@ -102,7 +104,7 @@ def complete_task(session: Session, id: int) -> bool:
         return False
     
     console.print(task, f"\n[green]Task [yellow bold]{id}[/yellow bold] marked as completed successfully ✔[/green]")
-    logger.debug(f"Marked Task witb {id=} as completed")
+    logger.debug(f"Marked Task with {id=} as completed")
     return True
 
 def list_tasks(session: Session, order_by: str = "id", reveresed_flag: bool = False) -> None:
