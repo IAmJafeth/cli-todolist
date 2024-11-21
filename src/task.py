@@ -8,21 +8,21 @@ from logger import get_logger
 console = Console()
 logger = get_logger()
 
-def get_task_by_id(session: Session, id: int) -> Task | None:
-    logger.debug(f"Fetching Task with {id=}")
-    task = session.query(Task).filter(Task.id == id).first()
+def get_task_by_id(session: Session, task_id: int) -> Task | None:
+    logger.debug(f"Fetching Task with {task_id=}")
+    task: Task | None= session.query(Task).filter(Task.id == task_id).first()
 
     if not task: 
-        console.print(f"[bold red]Error:[/bold red] [red]Task with id [yellow bold]{id}[/yellow bold] not found ×[/red]")
-        logger.warning(f"Task with {id=} not found")
+        console.print(f"[bold red]Error:[/bold red] [red]Task with id [yellow bold]{task_id}[/yellow bold] not found ×[/red]")
+        logger.warning(f"Task with {task_id=} not found")
         return
     
-    logger.debug(f"Retrieved Task with {id=} found: {task}")
+    logger.debug(f"Retrieved Task with {task_id=} found: {task}")
     return task
 
 def edit_task(
         session: Session, 
-        id: int, 
+        task_id: int,
         title: str = None, 
         description: str = None, 
         completed: bool = None, 
@@ -34,19 +34,19 @@ def edit_task(
     else:
         completed = None
     
-    task = update_task(session, id, title, description, completed)
+    task = update_task(session, task_id, title, description, completed)
 
     if not task:
         return False
     
-    console.print(task, f"\n[green]Task [yellow bold]{id}[/yellow bold] editted successfully ✔[/green]\n")
+    console.print(task, f"\n[green]Task [yellow bold]{task_id}[/yellow bold] edited successfully ✔[/green]\n")
     return True
 
-def get_all_tasks(session: Session, order_by: str = 'id', reveresed_flag: bool = False) -> list[Task]:
-    logger.debug(f"Fetching all tasks ordered by {order_by}, reversed: {reveresed_flag}.")
+def get_all_tasks(session: Session, order_by: str = 'id', reversed_flag: bool = False) -> list[Task]:
+    logger.debug(f"Fetching all tasks ordered by {order_by}, reversed: {reversed_flag}.")
     tasks = session.query(Task).order_by(getattr(Task,order_by)).all()
     logger.debug(f"Retrieved {len(tasks)} tasks.")
-    return tasks if not reveresed_flag else list(reversed(tasks))
+    return tasks if not reversed_flag else list(reversed(tasks))
 
 
 def create_task(session: Session, title: str, description: str) -> bool:
@@ -59,30 +59,30 @@ def create_task(session: Session, title: str, description: str) -> bool:
     console.print(task, f"\n[green]Task [bold]{task.id}[/bold] created successfully ✔[/green]")
     return True
 
-def delete_task(session: Session, id: int, interactive: bool = False) -> bool:
-    logger.debug(f"Deleting Task with {id=}")
-    task = get_task_by_id(session, id)
+def delete_task(session: Session, task_id: int, interactive: bool = False) -> bool:
+    logger.debug(f"Deleting Task with {task_id=}")
+    task = get_task_by_id(session, task_id)
     if not task:
-        logger.warning(f"Attempted to delete non-existent task with {id=}.")
+        logger.warning(f"Attempted to delete non-existent task with {task_id=}.")
         return False
     
     if interactive:
         if not Confirm.ask(f"Do you want to delete: [yellow]{task.id}-[/yellow] [bold]{task.title}[/bold]?"):
             console.print("[bold red] Deletion Cancelled [/bold red]")
-            logger.info(f"Deletion of task {id} cancelled by user.")
+            logger.info(f"Deletion of task {task_id} cancelled by user.")
             return False
         
     session.delete(task)
     session.commit()
     console.print(task, f"\n[green]Task [bold]{task.id}[/bold] deleted successfully ✔[/green]")
-    logger.debug(f"Deleted Task with {id=}: {task}")
+    logger.debug(f"Deleted Task with {task_id=}: {task}")
     return True
     
 
-def update_task(session: Session, id: int, title: str = None, description: str = None, completed: bool = None, ) -> Task | None:
-    task = get_task_by_id(session, id)
+def update_task(session: Session, task_id: int, title: str = None, description: str = None, completed: bool = None, ) -> Task | None:
+    task = get_task_by_id(session, task_id)
     if not task:
-        logger.warning(f"Attempted to update non-existent task with {id=}.")
+        logger.warning(f"Attempted to update non-existent task with {task_id=}.")
         return
 
     logger.debug(f"Updating Task {task}: {title=}, {description=}, {completed=}")
@@ -97,18 +97,18 @@ def update_task(session: Session, id: int, title: str = None, description: str =
     session.refresh(task)
     return task
 
-def complete_task(session: Session, id: int) -> bool:
-    task = update_task(session, id,  completed=True)
+def complete_task(session: Session, task_id: int) -> bool:
+    task = update_task(session, task_id, completed=True)
     if not task:
-        logger.warning(f"Attempted to mark non-existent task with {id=} as completed.")
+        logger.warning(f"Attempted to mark non-existent task with {task_id=} as completed.")
         return False
     
-    console.print(task, f"\n[green]Task [yellow bold]{id}[/yellow bold] marked as completed successfully ✔[/green]")
-    logger.debug(f"Marked Task with {id=} as completed")
+    console.print(task, f"\n[green]Task [yellow bold]{task_id}[/yellow bold] marked as completed successfully ✔[/green]")
+    logger.debug(f"Marked Task with {task_id=} as completed")
     return True
 
-def list_tasks(session: Session, order_by: str = "id", reveresed_flag: bool = False) -> None:
-    tasks = get_all_tasks(session, order_by, reveresed_flag)
+def list_tasks(session: Session, order_by: str = "id", reversed_flag: bool = False) -> None:
+    tasks = get_all_tasks(session, order_by, reversed_flag)
     logger.debug("Listing tasks.")
 
     if not tasks:
@@ -127,15 +127,15 @@ def list_tasks(session: Session, order_by: str = "id", reveresed_flag: bool = Fa
     console.print(table)
 
 
-def interactive_edit_task(session: Session, id: int) -> bool:
+def interactive_edit_task(session: Session, task_id: int) -> bool:
     CHOICES_TO_EDIT = ['title', 'description', 'complete', 'incomplete']
-    task = get_task_by_id(session, id)
+    task = get_task_by_id(session, task_id)
 
     if not task: 
-        logger.warning(f"Attempted to interactive edit non-existent task with {id=}.")
+        logger.warning(f"Attempted to interactive edit non-existent task with {task_id=}.")
         return False
     
-    logger.info(f"Starting interactive edit for task {id}.")
+    logger.info(f"Starting interactive edit for task {task_id}.")
     console.print(task)
 
     while True: 
@@ -143,19 +143,19 @@ def interactive_edit_task(session: Session, id: int) -> bool:
         
         match field_to_edit:
             case 'title':
-                task = update_task(session, id, title=Prompt.ask(f"Enter the new {field_to_edit}"))
+                task = update_task(session, task_id, title=Prompt.ask(f"Enter the new {field_to_edit}"))
             case 'description':
-                task = update_task(session, id, description=Prompt.ask(f"\nEnter the new {field_to_edit}"))
+                task = update_task(session, task_id, description=Prompt.ask(f"\nEnter the new {field_to_edit}"))
             case 'complete':
-                task = update_task(session, id, completed=True)
+                task = update_task(session, task_id, completed=True)
             case 'incomplete':
-                task = update_task(session, id, completed=False)
+                task = update_task(session, task_id, completed=False)
             case _:
                 console.print(f"[bold red]Error:[/bold red] [red]Command not recognized ×[/red]")
                 return False
         
-        logger.info(f"Task {id} edited: {field_to_edit} updated.")
-        console.print('\n', task, f"\n[green]Task [yellow bold]{id}[/yellow bold] editted successfully ✔[/green]\n")
+        logger.info(f"Task {task_id} edited: {field_to_edit} updated.")
+        console.print('\n', task, f"\n[green]Task [yellow bold]{task_id}[/yellow bold] edited successfully ✔[/green]\n")
 
         if not Confirm.ask("Would you like to do another change?"):
             break

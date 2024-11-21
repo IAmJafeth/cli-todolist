@@ -20,7 +20,8 @@ class Task(Base):
     def __repr__(self) -> str:
         return f"<task.Task(id={self.id}, title={self.title}, description={self.description}, completed={self.completed})>"
 
-    def __rich_console__(self, console: Console, otions: ConsoleOptions)-> RenderResult :
+    # noinspection PyUnusedLocal
+    def __rich_console__(self, console: Console, options: ConsoleOptions)-> RenderResult :
         table = Table(title=f"Task {self.id} Details \n", show_edge=False, show_header=False, title_style="b")
         table.add_column(justify="right")
         table.add_column( justify="left")

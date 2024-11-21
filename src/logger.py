@@ -22,7 +22,6 @@ def setup_logger(logger_name: str = LOGGER_NAME, console_level: str = CONSOLE_LO
     # Console handler
     console_handler = RichHandler(markup=True, rich_tracebacks=True, tracebacks_show_locals=True)
     console_handler.setLevel(console_level)
-    console_formatter = logging.Formatter("%(levelname)s: %(message)s")
     logger.addHandler(file_handler)
     logger.addHandler(console_handler)
 
