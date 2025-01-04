@@ -8,14 +8,27 @@ from logger import get_logger
 console = Console()
 logger = get_logger()
 
-def get_task_by_id(session: Session, task_id: int) -> Task | None:
+def get_task_by_id(session: Session, task_id: int) -> Task:
+    """Fetch a task with the given id from the database.
+
+    Args:
+        session (Session): The SQLAlchemy Session object.
+        task_id (int): The id of the task to fetch.
+
+    Raises:
+        ValueError: If the task with the given id is not found
+
+    Returns:
+        Task: The Task object
+    """
+
     logger.debug(f"Fetching Task with {task_id=}")
     task: Task | None= session.query(Task).filter(Task.id == task_id).first()
 
     if not task: 
         console.print(f"[bold red]Error:[/bold red] [red]Task with id [yellow bold]{task_id}[/yellow bold] not found ×[/red]")
         logger.warning(f"Task with {task_id=} not found")
-        return
+        raise ValueError(f"Task with id {task_id} not found.")
     
     logger.debug(f"Retrieved Task with {task_id=} found: {task}")
     return task
@@ -27,63 +40,140 @@ def edit_task(
         description: str = None, 
         completed: bool = None, 
         incomplete: bool = None
-        ) -> bool: 
+        ) -> None: 
+    """Edit a task with the given values.
     
+    Args:
+        session (Session): The SQLAlchemy Session object.
+        task_id (int): The id of the task to edit.
+        title (str, optional): The new title for the task. Defaults to None.
+        description (str, optional): The new description for the task. Defaults to None.
+        completed (bool, optional): Mark the task as completed. Defaults to None.
+        incomplete (bool, optional): Mark the task as incomplete. Defaults to None.
+
+    Raises:
+        ValueError: If the task with the given id is not found
+
+    Returns:
+        None: None
+    """
     if any([completed, incomplete]):
         completed = True if completed else False
     else:
         completed = None
     
     task = update_task(session, task_id, title, description, completed)
-
-    if not task:
-        return False
     
     console.print(task, f"\n[green]Task [yellow bold]{task_id}[/yellow bold] edited successfully ✔[/green]\n")
-    return True
 
 def get_all_tasks(session: Session, order_by: str = 'id', reversed_flag: bool = False) -> list[Task]:
+    """Fetch all tasks from the database.
+
+    Args:
+        session (Session): The SQLAlchemy Session object.
+        order_by (str, optional): The column to order by. Defaults to 'id'.
+        reversed_flag (bool, optional): Whether to reverse the order. Defaults to False.
+
+    Raises:
+        Exception: If there is an error fetching tasks
+
+    Returns:
+        list[Task]: A list of Task objects
+    """
+
     logger.debug(f"Fetching all tasks ordered by {order_by}, reversed: {reversed_flag}.")
-    tasks = session.query(Task).order_by(getattr(Task,order_by)).all()
+    try:
+        tasks = session.query(Task).order_by(getattr(Task,order_by)).all()
+    except Exception as e:
+        logger.exception(f"Error fetching tasks: {e}")
+        console.print(f"[bold red]Error:[/bold red] [red]Error fetching tasks: {e} ×[/red]")
+        raise e
     logger.debug(f"Retrieved {len(tasks)} tasks.")
     return tasks if not reversed_flag else list(reversed(tasks))
 
 
-def create_task(session: Session, title: str, description: str) -> bool:
+def create_task(session: Session, title: str, description: str):
+    """Create a new task with the given title and description.
+
+    Args:
+        session (Session): The SQLAlchemy Session object.
+        title (str): The title of the task.
+        description (str): The description of the task.
+    
+    Raises:
+        Exception: If there is an error creating the task
+
+    Returns:
+        None: None
+    """
+
     logger.debug(f"Creating Task with {title=}, {description=}")
     task = Task(title=title, description=description)
-    session.add(task)
-    session.commit()
-    session.refresh(task)
+    try:
+        session.add(task)
+        session.commit()
+        session.refresh(task)
+    except Exception as e:
+        logger.exception(f"Error creating task: {e}")
+        console.print(f"[bold red]Error:[/bold red] [red]Error creating task: {e} ×[/red]")
+        raise e
     logger.debug(f"Task created: {task}")
     console.print(task, f"\n[green]Task [bold]{task.id}[/bold] created successfully ✔[/green]")
-    return True
 
-def delete_task(session: Session, task_id: int, interactive: bool = False) -> bool:
+def delete_task(session: Session, task_id: int, interactive: bool = False) -> None:
+    """Delete a task with the given id.	
+
+    Args:
+        session (Session): The SQLAlchemy Session object.
+        task_id (int): The id of the task to delete.
+        interactive (bool, optional): Whether to ask for confirmation before deleting. Defaults to False.
+
+    Raises:
+        ValueError: If the task with the given id is not found
+        Exception: If there is an error deleting the task
+
+    Returns:    
+        None: None
+    """
     logger.debug(f"Deleting Task with {task_id=}")
     task = get_task_by_id(session, task_id)
-    if not task:
-        logger.warning(f"Attempted to delete non-existent task with {task_id=}.")
-        return False
     
     if interactive:
         if not Confirm.ask(f"Do you want to delete: [yellow]{task.id}-[/yellow] [bold]{task.title}[/bold]?"):
             console.print("[bold red] Deletion Cancelled [/bold red]")
             logger.info(f"Deletion of task {task_id} cancelled by user.")
-            return False
-        
-    session.delete(task)
-    session.commit()
+            return
+    
+    try:
+        session.delete(task)
+        session.commit()
+    except Exception as e:
+        logger.exception(f"Error deleting task: {e}")
+        console.print(f"[bold red]Error:[/bold red] [red]Error deleting task: {e} ×[/red]")
+        raise e
+    
     console.print(task, f"\n[green]Task [bold]{task.id}[/bold] deleted successfully ✔[/green]")
     logger.debug(f"Deleted Task with {task_id=}: {task}")
-    return True
     
 
-def update_task(session: Session, task_id: int, title: str = None, description: str = None, completed: bool = None, ) -> Task | None:
+def update_task(session: Session, task_id: int, title: str = None, description: str = None, completed: bool = None, ) -> Task :
+    """Update a task with the given values.
+
+    Args:
+        session (Session): The SQLAlchemy Session object.
+        task_id (int): The id of the task to update.
+        title (str, optional): The new title for the task. Defaults to None.
+        description (str, optional): The new description for the task. Defaults to None.
+        completed (bool, optional): Mark the task as completed. Defaults to None.
+
+    Raises:
+        ValueError: If the task with the given id is not found
+
+    Returns:
+        Task: The updated Task object
+    """
+
     task = get_task_by_id(session, task_id)
-    if not task:
-        logger.warning(f"Attempted to update non-existent task with {task_id=}.")
-        return
 
     logger.debug(f"Updating Task {task}: {title=}, {description=}, {completed=}")
     if title is not None:
@@ -97,17 +187,38 @@ def update_task(session: Session, task_id: int, title: str = None, description: 
     session.refresh(task)
     return task
 
-def complete_task(session: Session, task_id: int) -> bool:
+def complete_task(session: Session, task_id: int) -> Task:
+    """Mark a task as completed.
+
+    Args:
+        session (Session): The SQLAlchemy Session object.
+        task_id (int): The id of the task to mark as completed.
+
+    Raises:
+        ValueError: If the task with the given id is not found
+
+    Returns:
+        Task: The updated Task object
+    """
+
     task = update_task(session, task_id, completed=True)
-    if not task:
-        logger.warning(f"Attempted to mark non-existent task with {task_id=} as completed.")
-        return False
-    
     console.print(task, f"\n[green]Task [yellow bold]{task_id}[/yellow bold] marked as completed successfully ✔[/green]")
     logger.debug(f"Marked Task with {task_id=} as completed")
-    return True
+
+    return task
 
 def list_tasks(session: Session, order_by: str = "id", reversed_flag: bool = False) -> None:
+    """List all tasks.
+
+    Args:
+        session (Session): The SQLAlchemy Session object.
+        order_by (str, optional): The column to order by. Defaults to "id".
+        reversed_flag (bool, optional): Whether to reverse the order. Defaults to False.
+
+    Returns:
+        None: None
+    """
+
     tasks = get_all_tasks(session, order_by, reversed_flag)
     logger.debug("Listing tasks.")
 
@@ -127,13 +238,18 @@ def list_tasks(session: Session, order_by: str = "id", reversed_flag: bool = Fal
     console.print(table)
 
 
-def interactive_edit_task(session: Session, task_id: int) -> bool:
-    CHOICES_TO_EDIT = ['title', 'description', 'complete', 'incomplete']
-    task = get_task_by_id(session, task_id)
+def interactive_edit_task(session: Session, task_id: int) -> Task:
+    """Start an interactive edit session for a task.
 
-    if not task: 
-        logger.warning(f"Attempted to interactive edit non-existent task with {task_id=}.")
-        return False
+    Args:
+        session (Session): The SQLAlchemy Session object.
+        task_id (int): The id of the task to edit.
+
+    Returns:
+        Task: The updated Task object
+    """
+    CHOICES_TO_EDIT = ('title', 'description', 'complete', 'incomplete')
+    task = get_task_by_id(session, task_id)
     
     logger.info(f"Starting interactive edit for task {task_id}.")
     console.print(task)
@@ -152,12 +268,12 @@ def interactive_edit_task(session: Session, task_id: int) -> bool:
                 task = update_task(session, task_id, completed=False)
             case _:
                 console.print(f"[bold red]Error:[/bold red] [red]Command not recognized ×[/red]")
-                return False
+                logger.error(f"Invalid command: {field_to_edit}")
+                continue
         
         logger.info(f"Task {task_id} edited: {field_to_edit} updated.")
         console.print('\n', task, f"\n[green]Task [yellow bold]{task_id}[/yellow bold] edited successfully ✔[/green]\n")
 
         if not Confirm.ask("Would you like to do another change?"):
             break
-
-    return True
+    return task
