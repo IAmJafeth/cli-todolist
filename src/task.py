@@ -1,9 +1,12 @@
+from typing import Type
+
 from rich.table import Table
 from rich.console import Console
 from rich.prompt import Prompt, Confirm
 from sqlalchemy.orm import Session
 from models import Task
 from logger import get_logger
+from src.models import Task
 
 console = Console()
 logger = get_logger()
@@ -66,7 +69,7 @@ def edit_task(
     
     console.print(task, f"\n[green]Task [yellow bold]{task_id}[/yellow bold] edited successfully ✔[/green]\n")
 
-def get_all_tasks(session: Session, order_by: str = 'id', reversed_flag: bool = False) -> list[Task]:
+def get_all_tasks(session: Session, order_by: str = 'id', reversed_flag: bool = False) -> list[Type[Task] | list[None]]:
     """Fetch all tasks from the database.
 
     Args:
@@ -78,7 +81,7 @@ def get_all_tasks(session: Session, order_by: str = 'id', reversed_flag: bool = 
         Exception: If there is an error fetching tasks
 
     Returns:
-        list[Task]: A list of Task objects
+        list[Type[Task] | list[None]]: A list of Task objects
     """
 
     logger.debug(f"Fetching all tasks ordered by {order_by}, reversed: {reversed_flag}.")
@@ -92,7 +95,7 @@ def get_all_tasks(session: Session, order_by: str = 'id', reversed_flag: bool = 
     return tasks if not reversed_flag else list(reversed(tasks))
 
 
-def create_task(session: Session, title: str, description: str):
+def create_task(session: Session, title: str, description: str) -> Task:
     """Create a new task with the given title and description.
 
     Args:
@@ -116,9 +119,12 @@ def create_task(session: Session, title: str, description: str):
     except Exception as e:
         logger.exception(f"Error creating task: {e}")
         console.print(f"[bold red]Error:[/bold red] [red]Error creating task: {e} ×[/red]")
+        session.rollback()
         raise e
+
     logger.debug(f"Task created: {task}")
     console.print(task, f"\n[green]Task [bold]{task.id}[/bold] created successfully ✔[/green]")
+    return task
 
 def delete_task(session: Session, task_id: int, interactive: bool = False) -> None:
     """Delete a task with the given id.	
@@ -150,6 +156,7 @@ def delete_task(session: Session, task_id: int, interactive: bool = False) -> No
     except Exception as e:
         logger.exception(f"Error deleting task: {e}")
         console.print(f"[bold red]Error:[/bold red] [red]Error deleting task: {e} ×[/red]")
+        session.rollback()
         raise e
     
     console.print(task, f"\n[green]Task [bold]{task.id}[/bold] deleted successfully ✔[/green]")
@@ -183,8 +190,15 @@ def update_task(session: Session, task_id: int, title: str = None, description: 
     if completed is not None:
         task.completed = completed
 
-    session.commit() 
-    session.refresh(task)
+    try:
+        session.commit()
+        session.refresh(task)
+    except Exception as e:
+        logger.exception(f"Error updating task: {e}")
+        console.print(f"[bold red]Error:[/bold red] [red]Error updating task: {e} ×[/red]")
+        session.rollback()
+        raise e
+
     return task
 
 def complete_task(session: Session, task_id: int) -> Task:
@@ -196,6 +210,7 @@ def complete_task(session: Session, task_id: int) -> Task:
 
     Raises:
         ValueError: If the task with the given id is not found
+        Exception: If there is an error marking the task as completed
 
     Returns:
         Task: The updated Task object
@@ -245,10 +260,14 @@ def interactive_edit_task(session: Session, task_id: int) -> Task:
         session (Session): The SQLAlchemy Session object.
         task_id (int): The id of the task to edit.
 
+    Exceptions:
+        ValueError: If the task with the given id is not found
+        Exception: If there is an error updating the task
+
     Returns:
         Task: The updated Task object
     """
-    CHOICES_TO_EDIT = ('title', 'description', 'complete', 'incomplete')
+    CHOICES_TO_EDIT = ['title', 'description', 'complete', 'incomplete']
     task = get_task_by_id(session, task_id)
     
     logger.info(f"Starting interactive edit for task {task_id}.")

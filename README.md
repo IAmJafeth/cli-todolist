@@ -30,79 +30,60 @@
 ## TODO: Improve Functions
 
 ### 1. **Improve `get_task_by_id` Function**
-- [ ] **Clarify Return Value**  
+- [x] **Clarify Return Value**  
   - Update docstring to reflect return type (`Task | None`).
   - Ensure `None` is returned consistently for non-existent tasks.
 
-- [ ] **Handle Exceptions**  
+- [x] **Handle Exceptions**  
   - Catch potential database errors and provide meaningful error messages.
 
-- [ ] **Console Output**  
+- [x] **Console Output**  
   - Ensure error messages are properly logged or optionally printed.
 
 ### 2. **Improve `get_all_tasks` Function**
-- [ ] **Handle Empty Results**  
+- [x] **Handle Empty Results**  
   - Ensure a meaningful message is returned or logged when no tasks are found.
 
 ### 3. **Improve `create_task` Function**
-- [ ] **Clarify Return Value**  
+- [x] **Clarify Return Value**  
   - Return the created `Task` object instead of `True`.
 
-- [ ] **Handle Exceptions**  
+- [x] **Handle Exceptions**  
   - Roll back the transaction on errors.
   - Provide detailed error messages for debugging.
 
-- [ ] **Optional Console Output**  
-  - Ensure `console.print` is optional or configurable.
-
 ### 4. **Improve `delete_task` Function**
-- [ ] **Return Meaningful Value**  
-  - Return `False` explicitly if task deletion fails.
-
-- [ ] **Handle Exceptions**  
+- [x] **Handle Exceptions**  
   - Roll back the transaction and provide feedback in case of an error.
 
 ### 5. **Improve `update_task` Function**
-- [ ] **Clarify Return Value**  
+- [x] **Clarify Return Value**  
   - Return updated `Task` object explicitly.
 
-- [ ] **Handle Exceptions**  
+- [x] **Handle Exceptions**  
   - Roll back the transaction on failure.
 
-- [ ] **Optional Console Output**  
-  - Optionally log or print confirmation of updates.
-
 ### 6. **Improve `complete_task` Function**
-- [ ] **Clarify Return Value**  
+- [x] **Clarify Return Value**  
   - Return updated `Task` object for consistency.
 
-- [ ] **Handle Exceptions**  
+- [x] **Handle Exceptions**  
   - Ensure safe transaction handling.
 
-- [ ] **Optional Console Output**  
-  - Ensure output is configurable.
-
 ### 7. **Improve `list_tasks` Function**
-- [ ] **Handle Empty Results**  
-  - Display meaningful messages when no tasks are available.
-
 - [ ] **Table Display Improvements**  
   - Add more formatting options for better visualization.
 
 ### 8. **Improve `interactive_edit_task` Function**
-- [ ] **Ensure Consistency**  
+- [x] **Ensure Consistency**  
   - Use updated `Task` objects consistently for confirmation.
 
-- [ ] **Handle Exceptions**  
+- [x] **Handle Exceptions**  
   - Roll back the transaction on any error.
 
 ### 9. **Improve `edit_task` Function**
-- [ ] **Return Meaningful Value**  
+- [x] **Return Meaningful Value**  
   - Return the updated `Task` object for consistency.
-
-- [ ] **Handle Exceptions**  
-  - Provide robust error handling.
-
 ---
 
 ## Roadmap
